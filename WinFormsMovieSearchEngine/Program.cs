@@ -17,7 +17,7 @@ namespace WinFormsMovieSearchEngine
             var searchService = new SearchService(db);
 
             ApplicationConfiguration.Initialize();
-            Application.Run(new MseForm(searchService, db));
+            Application.Run(new MSEForm(searchService, db));
         }
     }
 }

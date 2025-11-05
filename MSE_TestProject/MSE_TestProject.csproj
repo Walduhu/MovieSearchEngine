@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClassLibrary\MSE_ClassLibrary.csproj" />
     <ProjectReference Include="..\MSE_ClassLibrary\MSE_ClassLibrary.csproj" />
   </ItemGroup>
 

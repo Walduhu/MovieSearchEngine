@@ -2,12 +2,12 @@ using MSE_ClassLibrary;
 
 namespace WinFormsMovieSearchEngine
 {
-    public partial class MseForm : Form
+    public partial class MSEForm : Form
     {
         private SearchService _searchService;
         private readonly MovieDB _db;
 
-        public MseForm(SearchService searchService, MovieDB db)
+        public MSEForm(SearchService searchService, MovieDB db)
         {
             InitializeComponent();
             _searchService = searchService;
@@ -66,12 +66,12 @@ namespace WinFormsMovieSearchEngine
 
             foreach (var film in result.FilmMatches)
             {
-                string line = $" {film.TitelD} ({film.Jahr}) | Regie: {film.Director?.Vorname} {film.Director?.Nachname}";
+                string line = $"  {film.TitelD} ({film.Jahr})  •  OG: {film.TitelOG}  •  Regie: {film.Director?.Vorname} {film.Director?.Nachname}";
 
                 var actors = film.Film_Acts.Select(fa => fa.Actor).ToList();
                 if (actors.Count != 0)
                 {
-                    line += ", Schauspieler:";
+                    line += "  •  Schauspieler:";
                     foreach (var actor in actors)
                     {
                         var syncs = actor.Act_Syncs.Select(s => s.Sync);
@@ -137,6 +137,21 @@ namespace WinFormsMovieSearchEngine
                 }
             }
 
+            // wenn keine Treffer, Anfrage zum Anlegen eines neuen Datensatzes
+            if (result.TotalCount == 0)
+            {
+                var response = MessageBox.Show(
+                    "Keine passenden Daten gefunden.\nMöchten Sie einen neuen Datensatz anlegen?",
+                    "Null Treffer",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (response == DialogResult.Yes)
+                {
+                    var createForm = new FormDataSetChoice();
+                    createForm.ShowDialog(this);
+                }
+            }
         }
 
     }
