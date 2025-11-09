@@ -42,9 +42,10 @@
             btnCancel.FlatStyle = FlatStyle.Flat;
             btnCancel.Font = new Font("Franklin Gothic Demi", 13.875F);
             btnCancel.ForeColor = Color.Black;
-            btnCancel.Location = new Point(428, 407);
+            btnCancel.Location = new Point(263, 254);
+            btnCancel.Margin = new Padding(2, 2, 2, 2);
             btnCancel.Name = "btnCancel";
-            btnCancel.Size = new Size(313, 59);
+            btnCancel.Size = new Size(193, 37);
             btnCancel.TabIndex = 6;
             btnCancel.Text = "Abbrechen";
             btnCancel.UseVisualStyleBackColor = false;
@@ -56,9 +57,10 @@
             btnSave.FlatStyle = FlatStyle.Flat;
             btnSave.Font = new Font("Franklin Gothic Demi", 13.875F);
             btnSave.ForeColor = Color.Black;
-            btnSave.Location = new Point(39, 407);
+            btnSave.Location = new Point(24, 254);
+            btnSave.Margin = new Padding(2, 2, 2, 2);
             btnSave.Name = "btnSave";
-            btnSave.Size = new Size(313, 59);
+            btnSave.Size = new Size(193, 37);
             btnSave.TabIndex = 5;
             btnSave.Text = "Speichern";
             btnSave.UseVisualStyleBackColor = false;
@@ -70,9 +72,10 @@
             txtTitelOG.BorderStyle = BorderStyle.FixedSingle;
             txtTitelOG.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             txtTitelOG.ForeColor = Color.Gray;
-            txtTitelOG.Location = new Point(38, 128);
+            txtTitelOG.Location = new Point(23, 80);
+            txtTitelOG.Margin = new Padding(2, 2, 2, 2);
             txtTitelOG.Name = "txtTitelOG";
-            txtTitelOG.Size = new Size(703, 46);
+            txtTitelOG.Size = new Size(433, 32);
             txtTitelOG.TabIndex = 2;
             txtTitelOG.Text = "Originaltitel...";
             txtTitelOG.Enter += txtTitelOG_Enter;
@@ -83,9 +86,10 @@
             txtTitelD.BorderStyle = BorderStyle.FixedSingle;
             txtTitelD.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             txtTitelD.ForeColor = Color.Gray;
-            txtTitelD.Location = new Point(38, 39);
+            txtTitelD.Location = new Point(23, 24);
+            txtTitelD.Margin = new Padding(2, 2, 2, 2);
             txtTitelD.Name = "txtTitelD";
-            txtTitelD.Size = new Size(703, 46);
+            txtTitelD.Size = new Size(433, 32);
             txtTitelD.TabIndex = 1;
             txtTitelD.Text = "Deutscher Titel...";
             txtTitelD.Enter += txtTitelD_Enter;
@@ -96,9 +100,10 @@
             txtJahr.BorderStyle = BorderStyle.FixedSingle;
             txtJahr.Font = new Font("Bahnschrift", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             txtJahr.ForeColor = Color.Gray;
-            txtJahr.Location = new Point(38, 219);
+            txtJahr.Location = new Point(23, 137);
+            txtJahr.Margin = new Padding(2, 2, 2, 2);
             txtJahr.Name = "txtJahr";
-            txtJahr.Size = new Size(703, 46);
+            txtJahr.Size = new Size(433, 32);
             txtJahr.TabIndex = 3;
             txtJahr.Text = "Erscheinungsjahr...";
             txtJahr.Enter += txtJahr_Enter;
@@ -108,23 +113,25 @@
             cmbDir.BackColor = Color.FromArgb(255, 224, 192);
             cmbDir.Font = new Font("Bahnschrift", 12F);
             cmbDir.FormattingEnabled = true;
-            cmbDir.Location = new Point(39, 311);
+            cmbDir.Location = new Point(24, 194);
+            cmbDir.Margin = new Padding(2, 2, 2, 2);
             cmbDir.Name = "cmbDir";
-            cmbDir.Size = new Size(702, 47);
+            cmbDir.Size = new Size(434, 32);
             cmbDir.TabIndex = 4;
             // 
             // FormAddFilm
             // 
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightSteelBlue;
-            ClientSize = new Size(774, 490);
+            ClientSize = new Size(476, 306);
             Controls.Add(cmbDir);
             Controls.Add(txtJahr);
             Controls.Add(btnCancel);
             Controls.Add(btnSave);
             Controls.Add(txtTitelOG);
             Controls.Add(txtTitelD);
+            Margin = new Padding(2, 2, 2, 2);
             Name = "FormAddFilm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Eingabe Datensatz Film";

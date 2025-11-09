@@ -124,6 +124,5 @@
         private TextBox txtNachname;
         private TextBox txtVorname;
         private ComboBox cmbFilm;
-        private ComboBox cmbSync;
     }
 }

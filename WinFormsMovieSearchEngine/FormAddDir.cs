@@ -5,7 +5,7 @@ namespace WinFormsMovieSearchEngine
     public partial class FormAddDir : Form
     {
         private readonly MovieDB _db;
-        public FormAddDir()
+        public FormAddDir(string inputDir)
         {
             InitializeComponent();
             _db = new MovieDB();

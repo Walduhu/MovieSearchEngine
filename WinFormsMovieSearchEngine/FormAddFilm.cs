@@ -22,10 +22,20 @@ namespace WinFormsMovieSearchEngine
 
             // kein Standardwert
             cmbDir.SelectedIndex = -1;
-            cmbDir.Text = "Regisseur wählen...";
+            cmbDir.Text = "Regisseur eingeben oder wählen...";
             cmbDir.ForeColor = Color.Gray;
 
-            // wenn User klickt, Standardtext löschen
+            // Standardtext bei Auswahl oder Eingabe schwarz machen
+
+            cmbDir.Enter += (s, e) =>
+            {
+                if (cmbDir.ForeColor == Color.Gray)
+                {
+                    cmbDir.Text = "";
+                    cmbDir.ForeColor = Color.Black;
+                }
+            };
+
             cmbDir.DropDown += (s, e) =>
             {
                 if (cmbDir.ForeColor == Color.Gray)
@@ -34,6 +44,16 @@ namespace WinFormsMovieSearchEngine
                     cmbDir.ForeColor = Color.Black;
                 }
             };
+
+            cmbDir.Leave += (s, e) =>
+            {
+                if (string.IsNullOrWhiteSpace(cmbDir.Text))
+                {
+                    cmbDir.Text = "Regisseur eingeben oder wählen...";
+                    cmbDir.ForeColor = Color.Gray;
+                }
+            };
+
 
         }
 
@@ -70,30 +90,72 @@ namespace WinFormsMovieSearchEngine
                 string.IsNullOrWhiteSpace(txtTitelOG.Text) ||
                 string.IsNullOrWhiteSpace(txtJahr.Text))
             {
-                MessageBox.Show("Bitte alle Felder ausfüllen!", "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Bitte alle Felder ausfüllen!", "Fehler",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            bool validSelection = false;
+            int? directorId = null;
 
-            // prüfen ob SelectedValue gesetzt und in Liste vorhanden ist
-            if (cmbDir.SelectedValue != null && cmbDir.SelectedValue is int id && id != 0)
-                validSelection = true;
-
-            // prüfen ob Text exakt einem ListItem entspricht
-            foreach (var item in cmbDir.Items)
+            // prüfen ob etwas ausgewählt wurde
+            if (cmbDir.SelectedValue != null && cmbDir.SelectedValue is int id && id > 0)
             {
-                var type = item.GetType();
-                var prop = type.GetProperty("Name");
-                if (prop != null && prop.GetValue(item)?.ToString() == cmbDir.Text)
-                    validSelection = true;
+                directorId = id;
             }
-
-            if (!validSelection)
+            else
             {
-                MessageBox.Show("Bitte einen Regisseur aus der Liste wählen!", "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                cmbDir.Focus();
-                return;
+                // User hat Text eingegeben
+                string inputDir = cmbDir.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(inputDir) || inputDir == "Regisseur eingeben oder aus Liste wählen...")
+                {
+                    MessageBox.Show("Bitte einen Regisseur eingeben oder auswählen!", "Fehler",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // prüfen ob Eingabe bereits existiert
+                var existing = _db.tbl_dir
+                    .FirstOrDefault(d => (d.Vorname + " " + d.Nachname) == inputDir);
+
+                if (existing != null)
+                {
+                    directorId = existing.DirID;
+                }
+                else
+                {
+                    // Benutzer fragen, ob neuer Regisseur angelegt werden soll
+                    var result = MessageBox.Show(
+                        $"Regisseur '{inputDir}' existiert nicht.\nJetzt anlegen?",
+                        "Neuer Regisseur",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question);
+
+                    if (result == DialogResult.No)
+                    {
+                        MessageBox.Show("Speichern abgebrochen.", "Hinweis");
+                        return;
+                    }
+
+                    // neues Eingabeformular öffnen
+                    new FormAddDir(inputDir).ShowDialog();
+
+                    // neuen Regisseur erneut aus DB holen
+                    var added = _db.tbl_dir
+                        .FirstOrDefault(d => (d.Vorname + " " + d.Nachname) == inputDir);
+
+                    if (added == null)
+                    {
+                        MessageBox.Show("Regisseur konnte nicht angelegt werden.");
+                        return;
+                    }
+
+                    directorId = added.DirID;
+
+                    // ComboBox aktualisieren
+                    ReloadDirectors();
+                    cmbDir.SelectedValue = directorId;
+                }
             }
 
             var newFilm = new Film
@@ -101,15 +163,26 @@ namespace WinFormsMovieSearchEngine
                 TitelD = txtTitelD.Text,
                 TitelOG = txtTitelOG.Text,
                 Jahr = int.Parse(txtJahr.Text),
-                DirID = (int)cmbDir.SelectedValue
+                DirID = directorId.Value
             };
 
             _db.tbl_film.Add(newFilm);
             _db.SaveChanges();
 
-            MessageBox.Show("Film gespeichert!", "Erfolg", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Film gespeichert!", "Erfolg");
             Close();
         }
+        private void ReloadDirectors()
+        {
+            var directors = _db.tbl_dir
+                .Select(d => new { d.DirID, Name = d.Vorname + " " + d.Nachname })
+                .ToList();
+
+            cmbDir.DataSource = directors;
+            cmbDir.DisplayMember = "Name";
+            cmbDir.ValueMember = "DirID";
+        }
+
 
         private void btnCancel_Click(object sender, EventArgs e)
         {

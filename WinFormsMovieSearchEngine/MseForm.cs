@@ -148,7 +148,7 @@ namespace WinFormsMovieSearchEngine
 
                 if (response == DialogResult.Yes)
                 {
-                    var createForm = new FormDataSetChoice();
+                    var createForm = new FormDataSetChoice(this.Name); // Konstruktor erhält den Form-Namen
                     createForm.ShowDialog(this);
                 }
             }

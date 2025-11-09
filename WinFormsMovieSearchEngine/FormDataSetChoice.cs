@@ -2,9 +2,11 @@
 {
     public partial class FormDataSetChoice : Form
     {
-        public FormDataSetChoice()
+        private readonly string _inputDir;
+        public FormDataSetChoice(string inputDir)
         {
             InitializeComponent();
+            _inputDir = inputDir;
         }
 
         private void btnAddFilm_Click(object sender, EventArgs e)
@@ -19,7 +21,8 @@
 
         private void btnAddDir_Click(object sender, EventArgs e)
         {
-            var d = new FormAddDir();
+            var d = new FormAddDir(_inputDir);
+
             if (d.ShowDialog() == DialogResult.OK)
             {
                 DialogResult = DialogResult.OK;
