@@ -66,7 +66,7 @@ namespace MSE_ClassLibrary
                             s.Nachname.ToLower().Contains(lowerTerm))
                 .ToList();
             result.SyncMatches = syncMatches;
-            result.SyncCount = syncMatches.Count;
+            result.SyncCount = actMatches.Count;
 
             // Gesamtanzahl
             result.TotalCount = result.FilmCount + result.ActCount + result.DirCount + result.SyncCount + result.YearCount;
@@ -74,20 +74,20 @@ namespace MSE_ClassLibrary
             return result;
         }
 
-        public class SearchResult
+        public sealed class SearchResult
         {
             public int TotalCount { get; set; }
             public int FilmCount { get; set; }
             public int YearCount { get; set; }
             public int DirCount { get; set; }
             public int ActCount { get; set; }
-            public int SyncCount { get; set; }
+            public int SyncCount { get => SyncMatches.Count; }
 
-            public List<Film> FilmMatches { get; set; } = new();
+            public ImmutableList<Film> FilmMatches { get; set; } = new();
             public List<Film> YearMatches { get; set; } = new();
             public List<Dir> DirMatches { get; set; } = new();
             public List<Act> ActMatches { get; set; } = new();
-            public List<Sync> SyncMatches { get; set; } = new();
+            public ImmutableList<Sync> SyncMatches { get; set; } = new();
         }
 
     }
