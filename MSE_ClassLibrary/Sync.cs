@@ -1,12 +1,20 @@
-﻿namespace MSE_ClassLibrary
+﻿using MSE_ClassLibrary.Interfaces;
+using System.Collections.Immutable;
+
+namespace MSE_ClassLibrary
 {
-    public class Sync
+    public class Sync : ISync
     {
-        public int SyncID { get; set; }
+        public int SyncID { get; set; } // internal ID
         public string? Vorname { get; set; }
         public string? Nachname { get; set; }
 
-        // Nav prop: Beziehung zu Act_Sync (n:m-Beziehung zwischen Actor und Synchronsprecher)
-        public ICollection<Act_Sync>? Act_Syncs { get; set; } = new List<Act_Sync>();
+        public ICollection<Act_Sync>? Act_Syncs { get; set; }
+
+        // Interface implementations
+        ImmutableList<IAct_Sync> ISync.Act_Syncs =>
+            Act_Syncs?.Select(a => (IAct_Sync)a).ToImmutableList()
+            ?? ImmutableList<IAct_Sync>.Empty;
     }
+
 }

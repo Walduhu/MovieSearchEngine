@@ -26,42 +26,6 @@ namespace MSE_ClassLibrary
             }
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<Film>()
-                .HasOne(f => f.Director)
-                .WithMany(d => d.Filme)
-                .HasForeignKey(f => f.DirID);
-
-            modelBuilder.Entity<Film_Act>()
-                .HasKey(fa => new { fa.FilmID, fa.ActID });
-
-            modelBuilder.Entity<Film_Act>()
-                .HasOne(fa => fa.Film)
-                .WithMany(f => f.Film_Acts)
-                .HasForeignKey(fa => fa.FilmID);
-
-            modelBuilder.Entity<Film_Act>()
-                .HasOne(fa => fa.Actor)
-                .WithMany(a => a.Film_Acts)
-                .HasForeignKey(fa => fa.ActID);
-
-            modelBuilder.Entity<Act_Sync>()
-                .HasKey(a => new { a.ActID, a.SyncID });
-
-            modelBuilder.Entity<Act_Sync>()
-                .HasOne(a => a.Actor)
-                .WithMany(a => a.Act_Syncs)
-                .HasForeignKey(a => a.ActID);
-
-            modelBuilder.Entity<Act_Sync>()
-                .HasOne(a => a.Sync)
-                .WithMany(s => s.Act_Syncs)
-                .HasForeignKey(a => a.SyncID);
-        }
-
         public static void SeedData(MovieDB db)
         {
             // prüfen, ob schon Daten existieren
