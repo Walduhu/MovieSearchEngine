@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MSE_ClassLibrary.Interfaces;
+using System.Collections.Immutable;
 
 namespace MSE_ClassLibrary
 {
@@ -9,86 +10,107 @@ namespace MSE_ClassLibrary
         public SearchService(MovieDB db)
         {
             _db = db;
-            _db.Database.EnsureCreated();
         }
 
         public SearchResult PerformSearch(string term)
         {
-            var lowerTerm = term.ToLower();
-            var result = new SearchResult();
+            term = term.Trim();
 
-            // Filme
-            var filmMatches = _db.tbl_film
-                .Include(f => f.Director)
-                .Include(f => f.Film_Acts)
-                    .ThenInclude(fa => fa.Actor)
-                        .ThenInclude(a => a.Act_Syncs)
-                            .ThenInclude(asyn => asyn.Sync)
-                .Where(f =>
-                    (f.TitelD != null && f.TitelD.ToLower().Contains(lowerTerm)) ||
-                    (f.TitelOG != null && f.TitelOG.ToLower().Contains(lowerTerm)))
-                .ToList();
+            // Ergebnisse aus Methoden holen
+            var filmMatches = SucheFilme(term);
+            var dirMatches = SucheRegisseure(term);
+            var actMatches = SucheSchauspieler(term);
+            var syncMatches = SucheSynchronsprecher(term);
+            var yearMatches = SucheJahr(term);
 
-            result.FilmMatches = filmMatches;
-            result.FilmCount = filmMatches.Count;
-
-            // Jahr-Suche
-            if (int.TryParse(term, out int year)) // ist Eingabe eine Zahl?
+            // SearchResult-Objekt bauen
+            return new SearchResult
             {
-                var yearMatches = _db.tbl_film
-                .Where(f => f.Jahr.ToString().Contains(term))
-                .ToList();
+                FilmMatches = filmMatches.ToImmutableList(),
+                DirMatches = dirMatches.ToImmutableList(),
+                ActMatches = actMatches.ToImmutableList(),
+                SyncMatches = syncMatches.ToImmutableList(),
+                YearMatches = yearMatches.ToImmutableList()
+            };
+        }
 
-                result.YearMatches = yearMatches;
-                result.YearCount = yearMatches.Count;
+        // Private Suchmethoden
+
+        private List<IFilm> SucheFilme(string term)
+        {
+            return _db.tbl_film
+                .Where(f => f.TitelD!.ToLower().Contains(term.ToLower()) ||
+                            f.TitelOG!.ToLower().Contains(term.ToLower()))
+                .Cast<IFilm>()
+                .ToList();
+        }
+
+        private List<IDir> SucheRegisseure(string term)
+        {
+            return _db.tbl_dir
+                .Where(d => d.Vorname!.ToLower().Contains(term.ToLower()) ||
+                            d.Nachname!.ToLower().Contains(term.ToLower()))
+                .Cast<IDir>()
+                .ToList();
+        }
+
+        private List<IAct> SucheSchauspieler(string term)
+        {
+            return _db.tbl_act
+                .Where(a => a.Vorname!.ToLower().Contains(term.ToLower()) ||
+                            a.Nachname!.ToLower().Contains(term.ToLower()))
+                .Cast<IAct>()
+                .ToList();
+        }
+
+        private List<ISync> SucheSynchronsprecher(string term)
+        {
+            return _db.tbl_sync
+                .Where(s => s.Vorname!.ToLower().Contains(term.ToLower()) ||
+                            s.Nachname!.ToLower().Contains(term.ToLower()))
+                .Cast<ISync>()
+                .ToList();
+        }
+
+        private List<IFilm> SucheJahr(string term)
+        {
+            if (int.TryParse(term, out var year)) // ist Eingabe ein int?
+            {
+                // exakte Jahr-Suche, z.B. "1999"
+                return _db.tbl_film
+                    .Where(f => f.Jahr == year)
+                    .Cast<IFilm>()
+                    .ToList();
             }
 
-            // Regisseure
-            var dirMatches = _db.tbl_dir
-                .Include(d => d.Filme)
-                .Where(d => d.Vorname.ToLower().Contains(lowerTerm) ||
-                            d.Nachname.ToLower().Contains(lowerTerm))
-                .ToList();
-            result.DirMatches = dirMatches;
-            result.DirCount = dirMatches.Count;
-
-            // Schauspieler
-            var actMatches = _db.tbl_act
-                .Where(a => a.Vorname.ToLower().Contains(lowerTerm) ||
-                            a.Nachname.ToLower().Contains(lowerTerm))
-                .ToList();
-            result.ActMatches = actMatches;
-            result.ActCount = actMatches.Count;
-
-            // Synchronsprecher
-            var syncMatches = _db.tbl_sync
-                .Where(s => s.Vorname.ToLower().Contains(lowerTerm) ||
-                            s.Nachname.ToLower().Contains(lowerTerm))
-                .ToList();
-            result.SyncMatches = syncMatches;
-            result.SyncCount = actMatches.Count;
-
-            // Gesamtanzahl
-            result.TotalCount = result.FilmCount + result.ActCount + result.DirCount + result.SyncCount + result.YearCount;
-
-            return result;
+            // partielle Jahr-Suche, z.B. "99" oder "20"
+            return _db.tbl_film
+                    .Where(f => f.Jahr.ToString().Contains(term))
+                    .Cast<IFilm>()
+                    .ToList();
         }
-
-        public sealed class SearchResult
-        {
-            public int TotalCount { get; set; }
-            public int FilmCount { get; set; }
-            public int YearCount { get; set; }
-            public int DirCount { get; set; }
-            public int ActCount { get; set; }
-            public int SyncCount { get => SyncMatches.Count; }
-
-            public ImmutableList<Film> FilmMatches { get; set; } = new();
-            public List<Film> YearMatches { get; set; } = new();
-            public List<Dir> DirMatches { get; set; } = new();
-            public List<Act> ActMatches { get; set; } = new();
-            public ImmutableList<Sync> SyncMatches { get; set; } = new();
-        }
-
     }
+
+    public sealed class SearchResult
+    {
+        // leer initialisierte Listen, um NullReferenceExceptions zu vermeiden
+        public ImmutableList<IFilm> FilmMatches { get; set; } = [];
+        public int FilmCount => FilmMatches.Count;
+
+        public ImmutableList<IDir> DirMatches { get; set; } = [];
+        public int DirCount => DirMatches.Count;
+
+        public ImmutableList<IAct> ActMatches { get; set; } = [];
+        public int ActCount => ActMatches.Count;
+
+        public ImmutableList<ISync> SyncMatches { get; set; } = [];
+        public int SyncCount => SyncMatches.Count;
+
+        public ImmutableList<IFilm> YearMatches { get; set; } = [];
+        public int YearCount => YearMatches.Count;
+
+        public int TotalCount => FilmCount + DirCount + ActCount + SyncCount + YearCount;
+    }
+
 }
+

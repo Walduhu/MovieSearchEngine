@@ -1,15 +1,24 @@
-﻿namespace MSE_ClassLibrary
+﻿using MSE_ClassLibrary.Interfaces;
+using System.Collections.Immutable;
+
+namespace MSE_ClassLibrary
 {
-    public class Act
+    public class Act : IAct
     {
-        public int ActID { get; set; }
+        public int ActID { get; set; } // internal ID
         public string? Vorname { get; set; }
         public string? Nachname { get; set; }
 
-        // Nav prop: Beziehung zu Film_Act (n:m-Beziehung zwischen Film und Actor)
-        public ICollection<Film_Act>? Film_Acts { get; set; } = new List<Film_Act>();
+        public ICollection<Film_Act>? Film_Acts { get; set; }
+        public ICollection<Act_Sync>? Act_Syncs { get; set; }
 
-        // Nav prop: Beziehung zu Act_Sync (n:m-Beziehung zwischen Actor und Synchronsprecher)
-        public ICollection<Act_Sync>? Act_Syncs { get; set; } = new List<Act_Sync>();
+        // Interface implementations
+        ImmutableList<IFilm_Act> IAct.Film_Acts =>
+            Film_Acts?.Select(fa => (IFilm_Act)fa).ToImmutableList()
+            ?? ImmutableList<IFilm_Act>.Empty;
+
+        ImmutableList<IAct_Sync> IAct.Act_Syncs =>
+            Act_Syncs?.Select(async => (IAct_Sync)async).ToImmutableList() ?? ImmutableList<IAct_Sync>.Empty;
     }
+
 }
