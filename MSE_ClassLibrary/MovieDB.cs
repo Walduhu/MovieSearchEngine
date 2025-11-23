@@ -26,6 +26,18 @@ namespace MSE_ClassLibrary
             }
         }
 
+        // zsmgesetzte Primärschlüssel für Film_Act und Act_Sync definieren,
+        // den Rest leitet EF Core automatisch aus den Hauptklassen ab
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Film_Act>()
+                .HasKey(fa => new { fa.FilmID, fa.ActID });
+
+            modelBuilder.Entity<Act_Sync>()
+                .HasKey(a => new { a.ActID, a.SyncID });
+        }
+
+
         public static void SeedData(MovieDB db)
         {
             // prüfen, ob schon Daten existieren
