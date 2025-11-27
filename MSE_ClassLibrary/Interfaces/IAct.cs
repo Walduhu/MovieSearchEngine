@@ -6,7 +6,13 @@ public interface IAct
     string? Vorname { get; }
     string? Nachname { get; }
 
-    ImmutableList<IFilm_Act> Film_Acts { get; }
-    ImmutableList<IAct_Sync> Act_Syncs { get; }
+    ImmutableList<IFilm> Filme { get; }
+    ImmutableList<ISync> Syncs { get; }
+
+    void AddFilm(IFilm film);
+    void RemoveFilm(IFilm film);
+
+    void AddSync(ISync sync);
+    void RemoveSync(ISync sync);
 }
 

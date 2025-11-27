@@ -10,14 +10,19 @@ namespace MSE_ClassLibrary
         public string? TitelOG { get; set; }
         public int Jahr { get; set; }
 
-        public Dir? Director { get; set; } // Navigation property
-        public ICollection<Film_Act>? Film_Acts { get; set; }
+        public int? DirectorID { get; set; } // FK
+
+        // Navigation properties
+        public Dir? Director { get; set; }
+        public ICollection<Film_Act>? Film_Acts { get; set; } 
+        public List<Act_Sync_Film> Act_Sync_Films { get; set; } = new();
 
         // Interface implementations
         IDir? IFilm.Director => Director;
         ImmutableList<IFilm_Act> IFilm.Film_Acts =>
             Film_Acts?.Select(fa => (IFilm_Act)fa).ToImmutableList()
             ?? ImmutableList<IFilm_Act>.Empty;
+
     }
 
 }

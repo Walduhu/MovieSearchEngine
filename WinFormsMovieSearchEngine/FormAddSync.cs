@@ -86,7 +86,7 @@ namespace WinFormsMovieSearchEngine
                 return;
             }
 
-            var selectedAct = (int)cmbAct.SelectedValue;
+            var selectedAct = cmbAct.SelectedValue is int actId ? actId : 0;
 
             var newSync = new Sync
             {
@@ -95,7 +95,7 @@ namespace WinFormsMovieSearchEngine
             };
 
             // Act-Verknüpfung
-            newSync.Act_Syncs.Add(new Act_Sync
+            newSync.Act_Sync_Films.Add(new Act_Sync_Film
             {
                 ActID = selectedAct
             });

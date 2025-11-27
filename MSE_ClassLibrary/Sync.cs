@@ -9,12 +9,15 @@ namespace MSE_ClassLibrary
         public string? Vorname { get; set; }
         public string? Nachname { get; set; }
 
-        public ICollection<Act_Sync>? Act_Syncs { get; set; }
+        // Navigation property
+        public List<Act_Sync_Film> Act_Sync_Films { get; set; } = new();
 
-        // Interface implementations
-        ImmutableList<IAct_Sync> ISync.Act_Syncs =>
-            Act_Syncs?.Select(a => (IAct_Sync)a).ToImmutableList()
-            ?? ImmutableList<IAct_Sync>.Empty;
+        // Interface implementation
+        ImmutableList<IAct_Sync_Film> ISync.Act_Sync_Films =>
+            Act_Sync_Films
+                .Where(a => a != null)
+                .Select(a => (IAct_Sync_Film)a)
+                .ToImmutableList();
+
     }
-
 }

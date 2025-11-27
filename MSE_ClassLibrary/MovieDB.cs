@@ -16,7 +16,7 @@ namespace MSE_ClassLibrary
         public DbSet<Act> tbl_act { get; set; }
         public DbSet<Sync> tbl_sync { get; set; }
         public DbSet<Film_Act> tbl_film_act { get; set; }
-        public DbSet<Act_Sync> tbl_act_sync { get; set; }
+        public DbSet<Act_Sync_Film> tbl_act_sync_film { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -26,15 +26,51 @@ namespace MSE_ClassLibrary
             }
         }
 
-        // zsmgesetzte Primärschlüssel für Film_Act und Act_Sync definieren,
-        // den Rest leitet EF Core automatisch aus den Hauptklassen ab
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Film>()
+                .HasOne(f => f.Director)
+                .WithMany(d => d.Filme)
+                .HasForeignKey(f => f.DirectorID);
+
             modelBuilder.Entity<Film_Act>()
                 .HasKey(fa => new { fa.FilmID, fa.ActID });
 
-            modelBuilder.Entity<Act_Sync>()
-                .HasKey(a => new { a.ActID, a.SyncID });
+            modelBuilder.Entity<Film_Act>()
+                .HasOne(fa => fa.Film)
+                .WithMany(f => f.Film_Acts)
+                .HasForeignKey(fa => fa.FilmID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Film_Act>()
+                .HasOne(fa => fa.Act)
+                .WithMany(a => a.Film_Acts)
+                .HasForeignKey(fa => fa.ActID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // zsmgesetzter Primärschlüssel
+            modelBuilder.Entity<Act_Sync_Film>()
+                .HasKey(asf => new { asf.FilmID, asf.ActID, asf.SyncID });
+
+            // Beziehungen ohne Rücknavigation (keine Collections in den Zielklassen)
+            // mit Löschkaskade bei Löschung eines Films, Schauspielers oder Synchronsprechers
+            modelBuilder.Entity<Act_Sync_Film>()
+                .HasOne(f => f.Film)
+                .WithMany()       
+                .HasForeignKey(f => f.FilmID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Act_Sync_Film>()
+                .HasOne(a => a.Act)
+                .WithMany()
+                .HasForeignKey(a => a.ActID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Act_Sync_Film>()
+                .HasOne(s => s.Sync)
+                .WithMany()
+                .HasForeignKey(s => s.SyncID)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
 
@@ -83,11 +119,11 @@ namespace MSE_ClassLibrary
                 new Film_Act { FilmID = db.tbl_film.First(f => f.TitelD == "Oppenheimer").FilmID, ActID = cil.ActID }
             );
 
-            db.tbl_act_sync.AddRange(
-                new Act_Sync { ActID = arnie.ActID, SyncID = tom.SyncID },
-                new Act_Sync { ActID = leo.ActID, SyncID = ger.SyncID },
-                new Act_Sync { ActID = matt.ActID, SyncID = ben.SyncID },
-                new Act_Sync { ActID = cil.ActID, SyncID = nor.SyncID }
+            db.tbl_act_sync_film.AddRange(
+                new Act_Sync_Film { ActID = arnie.ActID, SyncID = tom.SyncID, FilmID = db.tbl_film.First(f => f.TitelD == "Terminator 2 – Tag der Abrechnung").FilmID },
+                new Act_Sync_Film { ActID = leo.ActID, SyncID = ger.SyncID, FilmID = db.tbl_film.First(f => f.TitelD == "Inception").FilmID },
+                new Act_Sync_Film { ActID = matt.ActID, SyncID = ben.SyncID, FilmID = db.tbl_film.First(f => f.TitelD == "Interstellar").FilmID },
+                new Act_Sync_Film { ActID = cil.ActID, SyncID = nor.SyncID, FilmID = db.tbl_film.First(f => f.TitelD == "Oppenheimer").FilmID }
             );
 
             db.SaveChanges();

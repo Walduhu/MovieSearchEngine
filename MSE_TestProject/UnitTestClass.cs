@@ -6,7 +6,7 @@ namespace MSE_TestProject
     [TestClass]
     public class SearchServiceTests
     {
-        private DbContextOptions<MovieDB>? options;
+        private DbContextOptions<MovieDB> options = null!; // nicht-null-Initialisierung sicherstellen
 
         [TestInitialize]
         public void Setup()

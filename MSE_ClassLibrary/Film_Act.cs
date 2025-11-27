@@ -8,11 +8,11 @@ namespace MSE_ClassLibrary
         public int ActID { get; set; }
 
         public Film? Film { get; set; }
-        public Act? Actor { get; set; }
+        public Act? Act { get; set; }
 
         // Interface implementations
         IFilm? IFilm_Act.Film => Film;
-        IAct? IFilm_Act.Actor => Actor;
+        IAct? IFilm_Act.Actor => Act;
     }
 
 }

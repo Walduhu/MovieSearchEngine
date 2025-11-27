@@ -6,6 +6,5 @@ public interface ISync
     string? Vorname { get; }
     string? Nachname { get; }
 
-    ImmutableList<IAct_Sync> Act_Syncs { get; }
+    ImmutableList<IAct_Sync_Film> Act_Sync_Films { get; }
 }
-
