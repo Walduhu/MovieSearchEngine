@@ -163,7 +163,7 @@ namespace WinFormsMovieSearchEngine
                 TitelD = txtTitelD.Text,
                 TitelOG = txtTitelOG.Text,
                 Jahr = int.Parse(txtJahr.Text),
-                DirID = directorId.Value
+                Director = _db.tbl_dir.FirstOrDefault(d => d.DirID == directorId.Value)
             };
 
             _db.tbl_film.Add(newFilm);

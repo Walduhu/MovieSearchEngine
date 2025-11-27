@@ -66,22 +66,53 @@ namespace WinFormsMovieSearchEngine
 
             foreach (var film in result.FilmMatches)
             {
+                // Grundinfo
                 string line = $"  {film.TitelD} ({film.Jahr})  •  OG: {film.TitelOG}  •  Regie: {film.Director?.Vorname} {film.Director?.Nachname}";
 
-                var actors = film.Film_Acts.Select(fa => fa.Actor).ToList();
-                if (actors.Count != 0)
+                // Schauspieler im Film ermitteln
+                var actorsInFilm = _db.tbl_film_act
+                    .Where(fa => fa.Film != null && fa.Film.TitelD == film.TitelD && fa.Film.Jahr == film.Jahr && fa.Act != null)
+                    .Select(fa => fa.Act)
+                    .ToList();
+
+                if (actorsInFilm.Count > 0)
                 {
                     line += "  •  Schauspieler:";
-                    foreach (var actor in actors)
+
+                    foreach (var actor in actorsInFilm)
                     {
-                        var syncs = actor.Act_Syncs.Select(s => s.Sync);
-                        string syncNames = string.Join(", ", syncs.Select(s => $"{s.Vorname} {s.Nachname}"));
-                        line += $" {actor.Vorname} {actor.Nachname}";
+                        if (actor == null)
+                            continue;
+
+                        // alle Synchronsprecher für diesen Schauspieler in diesem Film
+                        var syncsInFilm = _db.tbl_act_sync_film
+                            .Where(asf =>
+                                asf.Film != null &&
+                                asf.Film.TitelD != null &&
+                                film.TitelD != null &&
+                                asf.Film.TitelD == film.TitelD &&
+                                asf.Film.Jahr == film.Jahr &&
+                                asf.ActID == actor.ActID)
+                            .Select(asf => asf.Sync)
+                            .ToList();
+
+                        if (syncsInFilm.Count > 0)
+                        {
+                            string syncNames = string.Join(", ", syncsInFilm
+                                .Where(s => s != null)
+                                .Select(s => $"{s!.Vorname ?? string.Empty} {s!.Nachname ?? string.Empty}".Trim()));
+                            line += $" {actor.Vorname} {actor.Nachname} (Sprecher: {syncNames})";
+                        }
+                        else
+                        {
+                            line += $" {actor.Vorname} {actor.Nachname}";
+                        }
                     }
                 }
 
                 SearchResults.Items.Add(line);
             }
+
 
 
             SearchResults.Items.Add($"Filme nach Jahr: {result.YearCount}");
@@ -102,15 +133,16 @@ namespace WinFormsMovieSearchEngine
             SearchResults.Items.Add($"Schauspieler: {result.ActCount}");
             foreach (var a in result.ActMatches)
             {
-                var syncs = _db.tbl_act_sync
-                    .Where(x => x.ActID == a.ActID)
+                var syncs = _db.tbl_act_sync_film
+                    .Where(x => x.Act != null && x.Act.Vorname == a.Vorname && x.Act.Nachname == a.Nachname)
                     .Select(x => x.Sync)
+                    .Where(s => s != null)
                     .ToList();
 
                 if (syncs.Count != 0)
                 {
                     foreach (var s in syncs)
-                        SearchResults.Items.Add($"  {a.Vorname} {a.Nachname} (Sprecher: {s.Vorname} {s.Nachname})");
+                        SearchResults.Items.Add($"  {a.Vorname} {a.Nachname} (Sprecher: {s!.Vorname ?? string.Empty} {s!.Nachname ?? string.Empty})");
                 }
                 else
                 {
@@ -121,15 +153,18 @@ namespace WinFormsMovieSearchEngine
             SearchResults.Items.Add($"Synchronsprecher: {result.SyncCount}");
             foreach (var s in result.SyncMatches)
             {
-                var acts = _db.tbl_act_sync
-                    .Where(x => x.SyncID == s.SyncID)
-                    .Select(x => x.Actor)
+                var acts = _db.tbl_act_sync_film
+                    .Where(x => x.Sync != null && x.Sync.Vorname == s.Vorname && x.Sync.Nachname == s.Nachname)
+                    .Select(x => x.Act)
                     .ToList();
 
                 if (acts.Count != 0)
                 {
                     foreach (var a in acts)
-                        SearchResults.Items.Add($"  {s.Vorname} {s.Nachname} (Sprecher von {a.Vorname} {a.Nachname})");
+                    {
+                        if (a != null)
+                            SearchResults.Items.Add($"  {s.Vorname} {s.Nachname} (Sprecher von {a.Vorname ?? string.Empty} {a.Nachname ?? string.Empty})");
+                    }
                 }
                 else
                 {
